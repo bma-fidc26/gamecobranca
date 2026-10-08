@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BMA · Simulador de Cobrança</title>
+<style>
+:root{
+  --bg:#07101f;--s1:#0d1b2e;--s2:#112240;--s3:#162b4d;
+  --b1:#1a2f4a;--b2:#243d5e;--b3:#2e4f76;
+  --tx:#dce8f5;--tx2:#7fa3c4;--tx3:#3d6080;
+  --blue:#1b6fd4;--blue2:#2b85f0;--blue3:#5ba3f5;
+  --gold:#f0a52a;--gold2:#fbbf3f;
+  --green:#0fb981;--green2:#34d399;
+  --red:#e53e3e;--red2:#fc8181;
+  --orange:#dd7b12;--orange2:#f6a535;
+  --purple:#7c3aed;--purple2:#a78bfa;
+  --cyan:#0891b2;--cyan2:#22d3ee;
+  --r:10px;--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:var(--bg);color:var(--tx);font-family:var(--sans);font-size:14px;line-height:1.6}
+.hidden{display:none!important}
+button{font-family:var(--sans);cursor:pointer;border:none;outline:none}
+input{font-family:var(--sans);outline:none}
+select{font-family:var(--sans);outline:none}
+
+/* ─── HEADER ─── */
+header{background:var(--s1);border-bottom:1px solid var(--b1);padding:0 24px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.hlogo{display:flex;align-items:center;gap:10px}
+.hmark{width:32px;height:32px;border-radius:7px;background:linear-gradient(135deg,var(--blue),#0d3f80);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:#fff;letter-spacing:.3px}
+.htitle{font-size:14px;font-weight:700;color:var(--tx)}
+.hsub{font-size:10px;color:var(--tx3);font-weight:500}
+.hright{display:flex;align-items:center;gap:10px}
+.hplayer{background:var(--s2);border:1px solid var(--b2);color:var(--blue3);font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px}
+
+/* ─── BTNS ─── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;transition:all .15s;white-space:nowrap}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue2);transform:translateY(-1px)}
+.btn-secondary{background:var(--s2);color:var(--tx2);border:1px solid var(--b2)}.btn-secondary:hover{background:var(--s3);color:var(--tx)}
+.btn-ghost{background:transparent;color:var(--tx2);border:1px solid var(--b1)}.btn-ghost:hover{background:var(--s2);color:var(--tx)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--orange));color:#fff}.btn-gold:hover{opacity:.9;transform:translateY(-1px)}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none!important}
+.btn-full{width:100%}
+
+/* ─── SCREENS ─── */
+.screen{display:flex;flex:1;flex-direction:column;align-items:center;justify-content:center;padding:32px 16px;min-height:calc(100vh - 54px)}
+
+/* ─── LOGIN ─── */
+.login-card{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:44px 36px;width:100%;max-width:400px;box-shadow:0 24px 60px #00000070}
+.login-hero{text-align:center;margin-bottom:32px}
+.login-mark{width:60px;height:60px;border-radius:14px;background:linear-gradient(135deg,var(--blue),#0a3070);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;color:#fff;margin:0 auto 14px;box-shadow:0 8px 28px #1b6fd450}
+.login-title{font-size:20px;font-weight:800;color:var(--tx)}
+.login-sub{font-size:12px;color:var(--tx3);margin-top:5px}
+.fgroup{margin-bottom:16px}
+label{display:block;font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+input[type=text]{width:100%;background:var(--s2);border:1.5px solid var(--b2);border-radius:8px;padding:11px 13px;color:var(--tx);font-size:14px;transition:border .2s}
+input[type=text]:focus{border-color:var(--blue)}
+input[type=text]::placeholder{color:var(--tx3)}
+.login-info{margin-top:16px;text-align:center;font-size:11px;color:var(--tx3);line-height:1.7}
+.comp-pills{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:8px}
+.cpill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid}
+
+/* ─── GAME ─── */
+.gpage{width:100%;max-width:760px;margin:0 auto;padding:24px 16px 60px}
+.gtop{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+.prog-wrap{flex:1;min-width:180px}
+.prog-label{font-size:11px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+.prog-bar{height:5px;background:var(--b1);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--blue),var(--blue3));transition:width .4s ease}
+.score-row{display:flex;align-items:center;gap:10px}
+.score-chip{background:var(--s2);border:1px solid var(--b2);border-radius:20px;padding:5px 14px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:5px}
+.score-n{color:var(--gold);font-size:15px}
+
+/* Timer */
+.timer{position:relative;width:46px;height:46px;flex-shrink:0}
+.timer svg{transform:rotate(-90deg)}
+.t-track{fill:none;stroke:var(--b1);stroke-width:3.5}
+.t-fill{fill:none;stroke-width:3.5;stroke-linecap:round;transition:stroke-dashoffset .95s linear,stroke .3s}
+.t-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--tx)}
+
+/* Card cenário */
+.scene-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:24px 26px;margin-bottom:14px}
+.smeta{display:flex;align-items:center;gap:7px;margin-bottom:14px;flex-wrap:wrap}
+.tag{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;padding:2px 9px;border-radius:20px;border:1px solid}
+.tag-basic{background:#10b98114;color:var(--green);border-color:#10b98130}
+.tag-inter{background:#f59e0b14;color:var(--orange2);border-color:#f59e0b30}
+.tag-adv{background:#e53e3e14;color:var(--red2);border-color:#e53e3e30}
+.tag-cat{background:var(--s2);color:var(--blue3);border-color:var(--b2)}
+.tag-skill{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:2px 9px;border-radius:20px;border:1px solid}
+.skill-AU{background:#7c3aed18;color:var(--purple2);border-color:#7c3aed30}
+.skill-VA{background:#0891b218;color:var(--cyan2);border-color:#0891b230}
+.skill-PR{background:#10b98118;color:var(--green2);border-color:#10b98130}
+.skill-CM{background:#f0a52a18;color:var(--gold2);border-color:#f0a52a30}
+.skill-CR{background:#e53e3e18;color:var(--red2);border-color:#e53e3e30}
+.sqnum{font-size:10px;color:var(--tx3);font-weight:700;margin-left:auto}
+.stitle{font-size:16px;font-weight:800;color:var(--tx);margin-bottom:8px;line-height:1.4}
+.stext{font-size:13.5px;color:var(--tx2);line-height:1.75}
+
+/* Opções */
+.opts{display:flex;flex-direction:column;gap:9px;margin-bottom:14px}
+.opt{background:var(--s1);border:1.5px solid var(--b2);border-radius:9px;padding:13px 16px;cursor:pointer;display:flex;align-items:flex-start;gap:11px;text-align:left;transition:all .14s;width:100%}
+.opt:hover:not(:disabled){border-color:var(--blue);background:var(--s2)}
+.opt:disabled{cursor:default}
+.opt.selected{border-color:var(--blue);background:#1b6fd415}
+.opt.correct{border-color:var(--green);background:#0fb98115}
+.opt.wrong{border-color:var(--red);background:#e53e3e10}
+.opt.reveal{border-color:var(--green);background:#0fb98110}
+.oletter{width:26px;height:26px;border-radius:6px;background:var(--b1);color:var(--tx2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;flex-shrink:0;transition:all .14s}
+.selected .oletter{background:var(--blue);color:#fff}
+.correct .oletter{background:var(--green);color:#fff}
+.wrong .oletter{background:var(--red);color:#fff}
+.reveal .oletter{background:var(--green);color:#fff}
+.otext{font-size:13px;color:var(--tx2);line-height:1.5;padding-top:3px}
+.correct .otext,.selected .otext,.reveal .otext{color:var(--tx)}
+
+/* Feedback */
+.fb-box{border-radius:9px;padding:15px 17px;margin-bottom:14px;border:1px solid;animation:fadein .25s ease}
+.fb-ok{background:#0fb98110;border-color:#0fb98130}
+.fb-fail{background:#e53e3e0e;border-color:#e53e3e28}
+.fb-timeout{background:#dd7b1210;border-color:#dd7b1228}
+.fb-header{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.fb-icon{font-size:16px}
+.fb-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.09em}
+.fb-ok .fb-label{color:var(--green)}
+.fb-fail .fb-label{color:var(--red2)}
+.fb-timeout .fb-label{color:var(--orange2)}
+.fb-pts{margin-left:auto;font-size:11px;font-weight:800;color:var(--gold)}
+.fb-text{font-size:13px;color:var(--tx2);line-height:1.65}
+.fb-skill{font-size:10px;color:var(--tx3);margin-top:6px;font-weight:600}
+@keyframes fadein{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+.thinking::after{content:'...';animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ─── RESULTADO ─── */
+.rpage{width:100%;max-width:680px;margin:0 auto;padding:24px 16px 60px}
+.rhero{background:linear-gradient(140deg,#091828,#112240);border:1px solid var(--b1);border-radius:16px;padding:36px 28px;text-align:center;margin-bottom:20px;position:relative;overflow:hidden}
+.rhero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% -20%,#1b6fd428,transparent 65%)}
+.rmedal{font-size:52px;position:relative;display:block;margin-bottom:10px}
+.rname{font-size:20px;font-weight:800;color:var(--tx);position:relative}
+.rscore{font-size:52px;font-weight:900;color:var(--gold);line-height:1;position:relative;margin:6px 0}
+.rlevel{font-size:13px;color:var(--tx2);position:relative}
+.rstats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.rstat{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:14px 10px;text-align:center}
+.rstat-v{font-size:22px;font-weight:800;color:var(--tx)}
+.rstat-l{font-size:10px;color:var(--tx3);margin-top:3px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+
+/* Radar de competências */
+.radar-wrap{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:20px;margin-bottom:16px}
+.sec-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3);margin-bottom:14px}
+.comp-bars{display:flex;flex-direction:column;gap:9px}
+.cbar-row{display:flex;align-items:center;gap:10px}
+.cbar-name{font-size:12px;color:var(--tx2);width:130px;flex-shrink:0}
+.cbar-wrap{flex:1;height:7px;background:var(--b1);border-radius:4px;overflow:hidden}
+.cbar-fill{height:100%;border-radius:4px;transition:width .8s ease}
+.cbar-pct{font-size:12px;font-weight:800;color:var(--tx);width:36px;text-align:right;flex-shrink:0}
+.cbar-pts{font-size:11px;color:var(--tx3);width:60px;text-align:right;flex-shrink:0}
+
+/* ─── LIDERANÇA ─── */
+.lpage{width:100%;max-width:920px;margin:0 auto;padding:24px 16px 60px}
+.lphead{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:22px}
+.lptitle{font-size:20px;font-weight:800;color:var(--tx)}
+.lpsub{font-size:12px;color:var(--tx3);margin-top:3px}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:22px}
+.kpi{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:14px 16px}
+.kpi-v{font-size:26px;font-weight:900;color:var(--tx)}
+.kpi-l{font-size:10px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-top:3px}
+
+/* Tabs */
+.tabs{display:flex;gap:2px;background:var(--s2);border-radius:8px;padding:3px;width:fit-content;margin-bottom:18px}
+.tab{padding:6px 15px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;color:var(--tx2);transition:all .14s}
+.tab.on{background:var(--s1);color:var(--tx);box-shadow:0 1px 4px #00000035}
+
+/* Leaderboard */
+.lb{background:var(--s1);border:1px solid var(--b1);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.lb-head{display:grid;grid-template-columns:38px 1fr 90px 90px 80px 80px;gap:6px;padding:9px 14px;background:var(--s2);border-bottom:1px solid var(--b1)}
+.lb-head span{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--tx3)}
+.lb-row{display:grid;grid-template-columns:38px 1fr 90px 90px 80px 80px;gap:6px;padding:12px 14px;border-bottom:1px solid var(--b1);align-items:center;transition:background .13s}
+.lb-row:last-child{border-bottom:none}
+.lb-row:hover{background:var(--s2)}
+.lb-rank{font-size:13px;font-weight:800;color:var(--tx3);text-align:center}
+.lb-rank.r1{color:var(--gold)}
+.lb-rank.r2{color:#b0bec5}
+.lb-rank.r3{color:#cd7f32}
+.lb-name{font-size:13px;font-weight:700;color:var(--tx)}
+.lb-sub{font-size:10px;color:var(--tx3);margin-top:1px}
+.lb-score{font-size:14px;font-weight:900;color:var(--gold);text-align:center}
+.lb-acc{font-size:13px;font-weight:700;text-align:center}
+.lb-time{font-size:12px;color:var(--tx2);text-align:center}
+.lb-badge{display:inline-flex;align-items:center;justify-content:center;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:800;text-transform:uppercase}
+.lv-E{background:#0fb98118;color:var(--green2);border:1px solid #0fb98130}
+.lv-S{background:#1b6fd418;color:var(--blue3);border:1px solid #1b6fd430}
+.lv-P{background:#f0a52a18;color:var(--gold2);border:1px solid #f0a52a30}
+.lv-J{background:#7c3aed18;color:var(--purple2);border:1px solid #7c3aed30}
+
+/* Painel competências */
+.comp-panel{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:20px;margin-bottom:16px}
+.comp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:14px}
+.comp-card{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:14px 16px}
+.comp-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.comp-card-name{font-size:12px;font-weight:800;color:var(--tx)}
+.comp-card-avg{font-size:18px;font-weight:900}
+.comp-mini-bars{display:flex;flex-direction:column;gap:5px}
+.cmb-row{display:flex;align-items:center;gap:6px;font-size:11px}
+.cmb-name{color:var(--tx2);width:90px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmb-bar{flex:1;height:4px;background:var(--b1);border-radius:2px;overflow:hidden}
+.cmb-fill{height:100%;border-radius:2px}
+.cmb-pct{color:var(--tx3);width:28px;text-align:right;flex-shrink:0}
+
+/* Detail */
+.detail-wrap{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:20px;margin-bottom:16px}
+.dselect{width:100%;background:var(--s2);border:1.5px solid var(--b2);border-radius:8px;padding:10px 12px;color:var(--tx);font-size:14px;margin-top:5px}
+.dcard{margin-top:20px}
+.dcard-hero{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+.dcard-name{font-size:18px;font-weight:800;color:var(--tx)}
+.dcard-sub{font-size:11px;color:var(--tx3);margin-top:2px}
+.dstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.dstat{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:11px;text-align:center}
+.dstat-v{font-size:20px;font-weight:800;color:var(--tx)}
+.dstat-l{font-size:9px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-top:2px}
+.weak-list{margin-top:14px}
+.weak-item{background:var(--s2);border:1px solid var(--b1);border-radius:7px;padding:10px 13px;margin-bottom:7px;display:flex;align-items:center;gap:10px}
+.weak-icon{font-size:14px}
+.weak-text{font-size:12px;color:var(--tx2)}
+.weak-text strong{color:var(--tx)}
+
+/* Spinner */
+.spin{width:28px;height:28px;border:3px solid var(--b1);border-top-color:var(--blue);border-radius:50%;animation:rotate .75s linear infinite;margin:0 auto}
+@keyframes rotate{to{transform:rotate(360deg)}}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;right:20px;z-index:999;background:var(--s1);border:1px solid var(--b2);border-radius:9px;padding:11px 16px;font-size:13px;color:var(--tx);box-shadow:0 8px 28px #00000060;animation:fadein .25s ease;max-width:300px}
+.toast.err{border-color:var(--red)}
+.toast.ok{border-color:var(--green)}
+
+@media(max-width:580px){
+  .lb-head,.lb-row{grid-template-columns:30px 1fr 70px 70px}
+  .lb-head span:nth-child(5),.lb-head span:nth-child(6),.lb-row>*:nth-child(5),.lb-row>*:nth-child(6){display:none}
+  .rstats{grid-template-columns:1fr 1fr}
+  .scene-card{padding:18px 16px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hlogo">
+    <div class="hmark">BM</div>
+    <div><div class="htitle">BMA · Simulador de Cobrança</div><div class="hsub">Avaliação de competências</div></div>
+  </div>
+  <div class="hright">
+    <span id="hPlayer" class="hplayer hidden"></span>
+    <button class="btn btn-ghost btn-sm" onclick="goLeadership()">🏆 Liderança</button>
+  </div>
+</header>
+
+<!-- LOGIN -->
+<div id="sLogin" class="screen">
+  <div class="login-card">
+    <div class="login-hero">
+      <div class="login-mark">BM</div>
+      <div class="login-title">Simulador de Cobrança</div>
+      <div class="login-sub">BMA Capital · FIDC · Avaliação de Analistas</div>
+    </div>
+    <div class="fgroup">
+      <label for="iName">Seu nome completo</label>
+      <input type="text" id="iName" placeholder="Ex: Ana Beatriz" maxlength="40" autocomplete="off"
+             onkeydown="if(event.key==='Enter')doStart()">
+    </div>
+    <button class="btn btn-primary btn-full" onclick="doStart()">Iniciar Simulação →</button>
+    <div class="login-info">
+      30 cenários reais · Timer por questão · IA avalia suas decisões
+      <div class="comp-pills" style="margin-top:8px">
+        <span class="cpill skill-AU">Autonomia</span>
+        <span class="cpill skill-VA">Visão Analítica</span>
+        <span class="cpill skill-PR">Proatividade</span>
+        <span class="cpill skill-CM">Comunicação</span>
+        <span class="cpill skill-CR">Controle de Risco</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="sGame" class="hidden">
+  <div class="gpage">
+    <div class="gtop">
+      <div class="prog-wrap">
+        <div class="prog-label">Questão <span id="gQn">1</span> de 30</div>
+        <div class="prog-bar"><div class="prog-fill" id="gProg" style="width:0%"></div></div>
+      </div>
+      <div class="score-row">
+        <div class="timer" id="timerWrap">
+          <svg width="46" height="46" viewBox="0 0 46 46">
+            <circle class="t-track" cx="23" cy="23" r="19"/>
+            <circle class="t-fill" id="tArc" cx="23" cy="23" r="19"
+                    stroke-dasharray="119.38" stroke-dashoffset="0" stroke="var(--blue)"/>
+          </svg>
+          <div class="t-num" id="tNum">60</div>
+        </div>
+        <div class="score-chip">⭐ <span class="score-n" id="gScore">0</span></div>
+      </div>
+    </div>
+
+    <div class="scene-card">
+      <div class="smeta">
+        <span class="tag tag-cat" id="mCat"></span>
+        <span class="tag" id="mDiff"></span>
+        <span class="tag-skill" id="mSkill"></span>
+        <span class="sqnum" id="mNum"></span>
+      </div>
+      <div class="stitle" id="mTitle"></div>
+      <div class="stext" id="mText"></div>
+    </div>
+
+    <div class="opts" id="optsGrid"></div>
+    <div id="fbBox" class="hidden"></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:6px">
+      <button class="btn btn-primary hidden" id="btnNext" onclick="goNext()">Próxima →</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTADO -->
+<div id="sResult" class="hidden">
+  <div class="rpage">
+    <div class="rhero">
+      <span class="rmedal" id="rMedal">🏅</span>
+      <div class="rname" id="rName"></div>
+      <div class="rscore" id="rScore"></div>
+      <div class="rlevel" id="rLevel"></div>
+    </div>
+    <div class="rstats">
+      <div class="rstat"><div class="rstat-v" id="rAcc"></div><div class="rstat-l">Aproveitamento</div></div>
+      <div class="rstat"><div class="rstat-v" id="rTime"></div><div class="rstat-l">Tempo médio</div></div>
+      <div class="rstat"><div class="rstat-v" id="rStreak"></div><div class="rstat-l">Maior sequência</div></div>
+    </div>
+    <div class="radar-wrap">
+      <div class="sec-title">Nota por competência</div>
+      <div class="comp-bars" id="rCompBars"></div>
+    </div>
+    <div class="radar-wrap" id="rWeakWrap">
+      <div class="sec-title">Pontos de atenção</div>
+      <div id="rWeak"></div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
+      <button class="btn btn-primary" onclick="doRestart()">↺ Nova Rodada</button>
+      <button class="btn btn-gold" onclick="goLeadership()">🏆 Ver Ranking</button>
+    </div>
+  </div>
+</div>
+
+<!-- LIDERANÇA -->
+<div id="sLeadership" class="hidden">
+  <div class="lpage">
+    <div class="lphead">
+      <div><div class="lptitle">🏆 Painel da Liderança</div><div class="lpsub">Desempenho em tempo real · BMA Cobrança</div></div>
+      <button class="btn btn-ghost btn-sm" onclick="goLogin()">← Voltar</button>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-v" id="kAnalysts">—</div><div class="kpi-l">Analistas</div></div>
+      <div class="kpi"><div class="kpi-v" id="kSessions">—</div><div class="kpi-l">Rodadas</div></div>
+      <div class="kpi"><div class="kpi-v" id="kAvgScore">—</div><div class="kpi-l">Score médio</div></div>
+      <div class="kpi"><div class="kpi-v" id="kAvgAcc">—</div><div class="kpi-l">Acurácia média</div></div>
+      <div class="kpi"><div class="kpi-v" id="kTopComp">—</div><div class="kpi-l">Melhor competência</div></div>
+      <div class="kpi"><div class="kpi-v" id="kWeakComp">—</div><div class="kpi-l">A desenvolver</div></div>
+    </div>
+    <div class="tabs">
+      <div class="tab on" onclick="swTab('ranking',this)">Ranking</div>
+      <div class="tab" onclick="swTab('comp',this)">Competências</div>
+      <div class="tab" onclick="swTab('detail',this)">Analista</div>
+    </div>
+    <div id="tRanking">
+      <div class="lb">
+        <div class="lb-head">
+          <span>#</span><span>Analista</span>
+          <span style="text-align:center">Score</span>
+          <span style="text-align:center">Acurácia</span>
+          <span style="text-align:center">T.Médio</span>
+          <span style="text-align:center">Nível</span>
+        </div>
+        <div id="lbBody"><div style="padding:24px;text-align:center"><div class="spin"></div></div></div>
+      </div>
+    </div>
+    <div id="tComp" class="hidden">
+      <div class="comp-panel">
+        <div class="sec-title">Acurácia média por competência — todos os analistas</div>
+        <div class="comp-grid" id="compGrid"></div>
+      </div>
+    </div>
+    <div id="tDetail" class="hidden">
+      <div class="detail-wrap">
+        <label>Selecionar analista</label>
+        <select class="dselect" id="dSel" onchange="loadDetail()">
+          <option value="">— selecione —</option>
+        </select>
+        <div id="dPanel"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// COMPETÊNCIAS
+// ══════════════════════════════════════════════════════════════
+const SKILLS = {
+  AU:{name:"Autonomia",       color:"#7c3aed",desc:"Age com segurança sem escalar o desnecessário"},
+  VA:{name:"Visão Analítica", color:"#0891b2",desc:"Lê o contexto e dados antes de decidir"},
+  PR:{name:"Proatividade",    color:"#0fb981",desc:"Antecipa problemas, não apenas reage"},
+  CM:{name:"Comunicação",     color:"#f0a52a",desc:"Tom e abordagem corretos com o cedente"},
+  CR:{name:"Controle de Risco",color:"#e53e3e",desc:"Não assume o que não pode sem embasamento"},
+};
+// Pesos para pontuação final
+const SKILL_WEIGHT = {AU:.25,VA:.25,PR:.20,CM:.15,CR:.15};
+
+// ══════════════════════════════════════════════════════════════
+// 30 CENÁRIOS — COBRANÇA BMA
+// ══════════════════════════════════════════════════════════════
+const Q = [
+// ─── PRORROGAÇÃO DE TÍTULOS ───
+{id:1,cat:"Prorrogação de Títulos",diff:"Básico",skill:"AU",
+ title:"Cedente pede prorrogação de R$95k sem documentação",
+ text:"Um cedente com bom histórico de pagamentos liga pedindo prorrogação de 30 dias para um título de R$95.000. Ele não enviou nenhum documento. Afirma que 'é só uma formalidade'. Qual a sua ação?",
+ opts:[
+  "Aprovar a prorrogação pelo bom histórico — documentação é burocracia",
+  "Solicitar os 3 requisitos obrigatórios: histórico de pagamentos atualizado, análise de concentração de carteira e justificativa formal do sacado, antes de qualquer decisão",
+  "Negar de imediato sem explicar o motivo",
+  "Escalar para o gestor resolver — você não quer a responsabilidade"
+ ],
+ correct:1,
+ explain:"Para prorrogações acima de R$80k, os 3 pilares são inegociáveis: histórico atualizado, concentração de carteira e justificativa do sacado. Bom histórico anterior não dispensa a documentação — é exatamente o que embasará a aprovação com segurança."},
+
+// ─── Q2: EXPLICAÇÃO DE JUROS NO BOLETO AO SACADO ───
+{id:2,cat:"Contestação de Mora",diff:"Intermediário",skill:"CM",
+ title:"Sacado questiona os juros cobrados no boleto",
+ text:"Um sacado da carteira do cedente AGROFÉRTIL liga irritado: 'O boleto que recebi está com um valor muito maior que o original. Vocês estão me cobrando uma taxa absurda!' O título original era de R$8.500 e o boleto atualizado está em R$9.395 (10% de multa + 2% de mora, totalizando R$895). Como você explica?",
+ opts:[
+  "Dizer que os juros são padrão e que ele precisa pagar sem questionar",
+  "Explicar que houve um erro no sistema e que vai corrigir o valor",
+  "Explicar com clareza e respeito: o boleto original era de R$8.500. Como o pagamento não foi realizado no vencimento, incidiram os encargos previstos no cadastro do cliente — multa de 10% (R$850) e mora de 2% (R$170), totalizando R$9.520. Oferecer o detalhamento por escrito e informar que as taxas são variáveis conforme cadastro de cada cliente",
+  "Isentar os juros para encerrar a reclamação rapidamente"
+ ],
+ correct:2,
+ explain:"O analista precisa explicar a composição do boleto com transparência: valor original, percentual de multa (10%), percentual de mora (2%) e o total atualizado. As taxas são variáveis por cadastro de cliente — jamais afirmar que são fixas. Oferecer o detalhamento por escrito demonstra profissionalismo e encerra dúvidas com evidência."},
+
+// ─── Q3 ───
+{id:3,cat:"Prorrogação de Títulos",diff:"Avançado",skill:"CR",
+ title:"Instrução de prorrogação sem autorização do cedente",
+ text:"O sacado de um título de R$140.000 liga pedindo prorrogação de 30 dias diretamente para você, sem nenhum envolvimento do cedente. Ele afirma que 'já combinou com o cedente' mas não há nenhuma comunicação registrada. O que você faz?",
+ opts:[
+  "Acatar o pedido do sacado — ele é quem paga o título",
+  "Prorrogar condicionado a o cedente confirmar por qualquer meio registrável, pois toda instrução/alteração em título exige autorização expressa de quem cedeu os direitos creditórios",
+  "Negar sem explicar o motivo",
+  "Acatar e depois avisar o cedente como cortesia"
+ ],
+ correct:1,
+ explain:"Regra fundamental da BMA: qualquer instrução ou alteração em título — prorrogação, recompra, cancelamento — exige autorização expressa do cedente, que é quem cedeu os direitos creditórios ao FIDC. O sacado pode solicitar, mas a instrução só é processada com o cedente confirmando, por qualquer meio registrável (e-mail, WhatsApp, telefone com registro)."},
+
+// ─── Q4 ───
+{id:4,cat:"Prorrogação de Títulos",diff:"Intermediário",skill:"PR",
+ title:"Título de R$88k vence em 5 dias — sacado sem sinal",
+ text:"Revisando a carteira, você identifica um título de R$88.000 vencendo em 5 dias. Nenhum contato do sacado, nenhuma promessa de pagamento. Histórico: 1 prorrogação nos últimos 6 meses, paga no prazo. O que você faz agora?",
+ opts:[
+  "Aguarda o vencimento e cobra normalmente se não pagar",
+  "Contata proativamente o sacado hoje para verificar a intenção de pagamento — se vier pedido de prorrogação, já orienta que a autorização precisa partir do cedente e inicia esse processo com tempo hábil",
+  "Envia e-mail automático de lembrete e aguarda resposta",
+  "Já registra como provável prorrogação no sistema preventivamente"
+ ],
+ correct:1,
+ explain:"Proatividade é antecipar, não reagir. Com 5 dias de antecedência e histórico de prorrogação anterior, o analista já aciona o sacado e, se houver pedido, lembra imediatamente que a autorização deve partir do cedente. Isso evita correria no dia do vencimento e garante que o processo seja feito corretamente."},
+
+// ─── Q5 ───
+{id:5,cat:"Prorrogação de Títulos",diff:"Avançado",skill:"VA",
+ title:"2ª prorrogação consecutiva — o que a análise revela",
+ text:"O cedente METALPRESS solicita prorrogação de R$110.000 referente ao sacado DISTRIBUIDORA DELTA. Ao analisar o histórico: 2ª prorrogação consecutiva em 4 meses, ambas pagas no último dia do prazo prorrogado. Concentração do sacado no cedente: 68%. Justificativa do sacado chegou, porém genérica. O que você conclui?",
+ opts:[
+  "Aprovar — o cedente autorizou e o sacado sempre pagou",
+  "Reprovar — duas prorrogações seguidas é sinal de má-fé",
+  "Encaminhar a prorrogação com registro de alerta no sistema: 2ª prorrogação consecutiva com pagamentos sempre no limite sugere dificuldade estrutural do sacado. Comunicar o gestor com o padrão identificado e recomendar monitoramento mais próximo desse sacado na carteira do cedente",
+  "Solicitar nova justificativa mais detalhada antes de qualquer encaminhamento"
+ ],
+ correct:2,
+ explain:"Visão analítica vai além do checklist. O padrão de 2 prorrogações consecutivas com pagamentos sempre no limite é informação que não aparece em nenhum campo — mas o analista atento lê e documenta. Aprovar sem esse registro perde uma oportunidade real de gestão de risco na carteira."},
+
+// ─── Q6 ───
+{id:6,cat:"Prorrogação de Títulos",diff:"Básico",skill:"AU",
+ title:"Prorrogação com todos os requisitos validados",
+ text:"Prorrogação de R$82.000. Cedente autorizou por WhatsApp (registrado). Histórico do sacado: 24 meses sem atraso. Concentração do sacado no cedente: 38%. O que você faz?",
+ opts:[
+  "Escala para o gestor decidir — não quer a responsabilidade",
+  "Aguarda o cedente ligar novamente para confirmar por telefone também",
+  "Com autorização do cedente registrada e análise favorável, você tem autonomia para processar a instrução — registra, executa e comunica o resultado ao cedente. Escalar aqui seria gargalo desnecessário",
+  "Pede um segundo canal de confirmação por precaução"
+ ],
+ correct:2,
+ explain:"Autonomia é saber o que está dentro do seu escopo. Autorização do cedente registrada + análise favorável = condições cumpridas. Escalar o que está dentro da política é ineficiência operacional. O analista de valor registra, executa e informa."},
+
+// ─── Q7 ───
+{id:7,cat:"Prorrogação de Títulos",diff:"Intermediário",skill:"CR",
+ title:"Justificativa do sacado genérica para R$95k",
+ text:"O sacado enviou mensagem ao cedente dizendo 'estamos com dificuldade de caixa e precisamos de prazo'. O cedente repassou a você autorizando a prorrogação. Título: R$95.000. Essa justificativa é suficiente para você processar?",
+ opts:[
+  "Sim — o cedente autorizou, cumpriu o requisito",
+  "Sim, mas registrar internamente que a justificativa foi genérica",
+  "A autorização do cedente está registrada — isso habilita o processamento. Porém, o analista com visão analítica registra que a justificativa do sacado foi genérica, para fins de análise de risco futura. Se for 2ª prorrogação ou valor elevado, alertar o gestor antes de processar",
+  "Reprovar sem dar chance ao cedente de reforçar a justificativa"
+ ],
+ correct:2,
+ explain:"A autorização do cedente é o requisito operacional que habilita a instrução. Mas registrar a qualidade da justificativa do sacado é o que diferencia o analista analítico do operacional. Essa informação alimenta a avaliação de risco futura do sacado na carteira."},
+
+// ─── Q8 ───
+{id:8,cat:"Prorrogação de Títulos",diff:"Básico",skill:"CM",
+ title:"Como comunicar ao cedente que a prorrogação foi processada",
+ text:"A prorrogação de R$88k foi autorizada pelo cedente e processada. Qual o retorno correto ao cedente?",
+ opts:[
+  "Não precisa retornar — o cedente já sabia que seria feito",
+  "Enviar mensagem simples: 'Feito.'",
+  "Confirmar ao cedente por escrito: título prorrogado, nova data de vencimento, encargos que incidirão sobre o período adicional (se aplicável) e orientar que um novo boleto será gerado ao sacado — criando rastreabilidade da instrução",
+  "Aguardar o cedente perguntar se foi processado"
+ ],
+ correct:2,
+ explain:"Comunicação de retorno com rastreabilidade protege o analista e o cedente. O cedente precisa saber: o que foi feito, qual a nova data e se haverá encargos adicionais. Confirmação por escrito evita divergências futuras e demonstra profissionalismo operacional."},
+
+// ─── ESCROW: PRORROGAÇÃO E RECOMPRA ───
+{id:9,cat:"Títulos Escrow",diff:"Intermediário",skill:"VA",
+ title:"Pedido de prorrogação em título escrow — cuidados",
+ text:"Você recebe autorização do cedente CONSTRUTORA ALPHA para prorrogar um título escrow de R$120.000 por 45 dias. Operação clean, sem coobrigação — o risco é integralmente do FIDC. O sacado alega dificuldade temporária. Quais verificações são indispensáveis antes de processar?",
+ opts:[
+  "Basta a autorização do cedente — é suficiente para qualquer instrução",
+  "Verificar concentração do sacado na carteira do cedente, histórico de liquidação do sacado e se há outros títulos desse sacado em aberto — em operação escrow o risco é do FIDC, então essas informações precisam ser avaliadas antes de processar",
+  "Consultar apenas o sistema de cadastro do cedente",
+  "Processar e avisar o gestor depois — o prazo do cedente é curto"
+ ],
+ correct:1,
+ explain:"Em operações escrow (clean), o FIDC assume o risco integralmente — não há coobrigação do cedente. Por isso, antes de prorrogar, o analista analítico verifica: concentração do sacado no cedente, histórico de liquidação e títulos em aberto. Essas informações mudam o perfil de risco da decisão e precisam estar documentadas."},
+
+// ─── Q10 ───
+{id:10,cat:"Títulos Escrow",diff:"Avançado",skill:"CR",
+ title:"Recompra de título escrow — motivo precisa ser registrado",
+ text:"O cedente IMOBILIÁRIA VITÓRIA solicita recompra de um título escrow de R$85.000. O sacado não pagou e o cedente quer retirar o título da carteira do FIDC. Qual é a conduta correta do analista?",
+ opts:[
+  "Processar imediatamente — o cedente tem o direito de recomprar a qualquer momento",
+  "Processar a recompra somente após o cedente informar e registrar formalmente o motivo — inadimplência do sacado, renegociação particular, substituição de título etc. — pois o motivo alimenta a análise de crédito futura e o histórico da operação",
+  "Recompra não é possível em operações escrow",
+  "Processar e anotar 'recompra solicitada pelo cedente' sem detalhar o motivo"
+ ],
+ correct:1,
+ explain:"Em recompra, o motivo precisa ser sempre informado e registrado — não é protocolo burocrático, é insumo de crédito. Um cedente que recompra títulos com frequência por inadimplência do sacado revela um padrão de risco que precisa ser analisado. 'Recompra solicitada' sem contexto não serve à gestão da carteira."},
+
+// ─── Q11 ───
+{id:11,cat:"Títulos Escrow",diff:"Avançado",skill:"VA",
+ title:"Escrow — sacado com múltiplos títulos e pedido de prorrogação",
+ text:"O cedente autoriza prorrogação de 1 título escrow de R$75.000. Ao abrir o sistema, você identifica que o mesmo sacado possui mais 3 títulos escrow na carteira desse cedente, todos com vencimento nos próximos 15 dias, totalizando R$290.000. O que essa informação muda na sua análise?",
+ opts:[
+  "Nada — processa o que foi autorizado e aguarda os demais vencerem",
+  "Reprova a prorrogação por causa dos outros títulos",
+  "A concentração total desse sacado (R$365k) e os vencimentos próximos são informação crítica. Processa a instrução autorizada, mas alerta o gestor proativamente sobre o cenário completo — 4 títulos escrow de um mesmo sacado com dificuldade declarada representa risco concentrado que merece atenção imediata",
+  "Solicita prorrogação dos 4 títulos de uma vez sem nova autorização"
+ ],
+ correct:2,
+ explain:"Visão analítica é enxergar o que não foi perguntado. O cedente autorizou 1 título — mas o analista atento vê os outros 3 e entende que o risco real é R$365k, não R$75k. Agir dentro da instrução e alertar o gestor sobre o cenário completo é a diferença entre executar e analisar."},
+
+// ─── DUPLICIDADE DE DESCONTO / PAGAMENTO ERRADO ───
+{id:12,cat:"Pagamento Incorreto",diff:"Avançado",skill:"VA",
+ title:"Sacado pagou para o cedente — não para o BMA (Divinolandia)",
+ text:"Em contato com o sacado da carteira do cedente DIVINOLANDIA (Rating D+, em dificuldade transitória), o sacado afirma que realizou o pagamento e encaminha comprovante. Após análise, você verifica que o beneficiário do TED foi a própria DIVINOLANDIA — e não o BMA FIDC. O título ainda consta em aberto no sistema. Qual a conduta correta?",
+ opts:[
+  "Dar baixa no título — o sacado pagou, mesmo que para o cedente",
+  "Orientar o sacado a solicitar estorno junto ao cedente e aguardar",
+  "Verificar a concentração do sacado na carteira do cedente e se há outros títulos em aberto. Em seguida, orientar o sacado de forma clara: os títulos foram objeto de cessão de direitos creditórios firmada na data da operação — o BMA FIDC é o único credor legítimo. Encaminhar os boletos corretos, informar que há registro bancário dos títulos e que podem ser adotados todos os meios de cobrança, inclusive protesto",
+  "Acionar o cedente para devolver o valor ao FIDC antes de qualquer ação com o sacado"
+ ],
+ correct:2,
+ explain:"Pagamento ao cedente após a cessão não quita a obrigação com o FIDC. A conduta correta: verificar concentração e títulos em aberto, orientar o sacado com firmeza e clareza sobre a cessão de direitos (com a data do contrato), encaminhar os boletos com o BMA como beneficiário e informar que há respaldo bancário para cobrança, incluindo protesto. O sacado precisa entender que pagar ao cedente não o libera da obrigação com o FIDC."},
+
+// ─── CONTESTAÇÃO DE MORA ───
+{id:13,cat:"Contestação de Mora",diff:"Básico",skill:"VA",
+ title:"Sacado diz que pagou no dia do vencimento",
+ text:"Sacado afirma que pagou no dia do vencimento e que a multa de 10% e a mora de 2% não deveriam incidir. O comprovante mostra TED feito às 17h42 do dia do vencimento. O extrato do FIDC mostra crédito D+1. O que você verifica antes de responder?",
+ opts:[
+  "Aceitar a contestação — o sacado pagou no dia",
+  "Verificar o cadastro do cliente e o instrumento contratual: o critério é data de débito na conta do sacado ou data de crédito na conta do FIDC? Essa informação define se os encargos são devidos",
+  "Negar sem verificar — D+1 é atraso, ponto final",
+  "Isentar os encargos para evitar desgaste no relacionamento"
+ ],
+ correct:1,
+ explain:"O contrato e o cadastro do cliente são a fonte da verdade antes de qualquer resposta. As taxas são variáveis por cliente. Responder sem verificar — para qualquer lado — é erro. A análise precisa ser baseada no instrumento firmado entre as partes."},
+
+{id:14,cat:"Contestação de Mora",diff:"Intermediário",skill:"AU",
+ title:"Cálculo com 1 dia a mais — R$340 cobrados indevidamente",
+ text:"Ao revisar o cálculo, você confirma que o sacado tem razão: a mora foi calculada com 1 dia a mais, gerando R$340 cobrados indevidamente em um título de R$12.000. Como você age?",
+ opts:[
+  "Aguarda o sacado escalar antes de agir",
+  "Escala para o gestor — qualquer ajuste financeiro precisa de aprovação superior",
+  "Reconhece o erro, corrige imediatamente, emite desconto no próximo boleto e comunica ao sacado de forma proativa — sem que ele precise brigar",
+  "Divide a diferença com o sacado como acordo"
+ ],
+ correct:2,
+ explain:"Autonomia inclui corrigir erros do próprio escopo. R$340 não precisa de escalonamento — precisa de ação rápida, registro correto e comunicação proativa. Erros reconhecidos antes de o sacado reclamar demonstram integridade e fortalecem o relacionamento."},
+
+{id:15,cat:"Contestação de Mora",diff:"Avançado",skill:"CM",
+ title:"Sacado irritado ameaça acionar o cedente por causa dos juros",
+ text:"Sacado irritado diz: 'Vou falar com o AGRONORTE (cedente) para cancelar essa cobrança. Vocês não têm o direito de me cobrar esses juros.' Valor contestado: R$180 de mora. Qual o tom e o conteúdo correto da resposta?",
+ opts:[
+  "Dizer que ele pode acionar quem quiser e encerrar a ligação",
+  "Isentar a mora para encerrar o conflito",
+  "Manter tom calmo e profissional: reconhecer a insatisfação, esclarecer que o BMA FIDC é o credor legítimo após a cessão de direitos — o cedente não tem poder de cancelar a cobrança — e comprometer-se a verificar o histórico de cálculos com retorno documentado em prazo definido",
+  "Explicar todo o processo de cessão de direitos até o sacado desistir"
+ ],
+ correct:2,
+ explain:"Além do tom (calma, sem atritos), o analista precisa esclarecer um ponto técnico importante: após a cessão, o cedente não tem poder de cancelar ou autorizar a dispensa de encargos. A relação de cobrança é diretamente entre o FIDC e o sacado. Isso precisa ser explicado com clareza e respeito — não como ameaça, mas como informação."},
+
+{id:16,cat:"Contestação de Mora",diff:"Intermediário",skill:"CR",
+ title:"Sacado pede isenção alegando que nunca recebeu aviso",
+ text:"Sacado solicita isenção de R$2.800 em encargos alegando que nunca recebeu nenhum boleto ou comunicação. No sistema constam 3 envios automáticos com confirmação de entrega (sem bounce). O que fazer?",
+ opts:[
+  "Isentar — o sacado disse que não recebeu e você não pode provar que leu",
+  "Apresentar ao sacado as datas e confirmações de entrega dos 3 envios. Se os registros confirmam, os encargos são devidos — comunicar isso com firmeza e respeito, sem ceder sem embasamento",
+  "Isentar metade como gesto de boa vontade",
+  "Reenviar os boletos e isentar automaticamente os encargos como compensação"
+ ],
+ correct:1,
+ explain:"Isentar sem embasamento cria precedente: todo sacado que não quiser pagar encargos vai alegar que não recebeu aviso. O registro do sistema é a evidência. A postura correta é apresentar os dados com firmeza e respeito — não ceder por pressão, mas também explicar claramente o que foi feito."},
+
+// ─── PRIORIZAÇÃO DE CARTEIRA ───
+{id:17,cat:"Priorização de Carteira",diff:"Básico",skill:"VA",
+ title:"Ordem de cobrança entre 4 sacados",
+ text:"São 9h. Você tem 4 sacados para contatar hoje:\n• A: R$5.000 · 3 dias · 1ª ocorrência\n• B: R$120.000 · 1 dia · bom histórico\n• C: R$8.000 · 45 dias · reincidente (3ª vez no ano)\n• D: R$50.000 · 12 dias · histórico regular\nQual a ordem correta?",
+ opts:[
+  "A → B → C → D (ordem de chegada no sistema)",
+  "B → D → C → A — maior valor + janela de ação + reincidência",
+  "C → B → D → A — mais antigo tem prioridade máxima",
+  "D → C → B → A — mais dias de atraso primeiro"
+ ],
+ correct:1,
+ explain:"A priorização BMA combina 3 fatores: valor (maior impacto financeiro), janela de ação (título recente tem maior chance de resolução rápida) e reincidência (sinal de risco). B (R$120k, 1 dia) tem prioridade máxima pela janela + valor. D (R$50k, 12 dias) vem em seguida. C (reincidente, R$8k) precisa de atenção antes de A, que tem menor risco relativo."},
+
+{id:18,cat:"Priorização de Carteira",diff:"Intermediário",skill:"PR",
+ title:"Organizando uma carteira de 15 títulos no dia",
+ text:"Início do dia: 15 títulos na carteira.\n• 3 vencem amanhã\n• 5 vencidos há menos de 5 dias (sem contato ainda)\n• 7 vencidos há mais de 15 dias (com tentativas anteriores)\nComo você organiza as ações?",
+ opts:[
+  "Começa pelos mais antigos — têm mora maior",
+  "Trata os que vencem amanhã (preventivo) → vencidos recentes sem contato (maior janela de resolução) → antigos com histórico de tentativas (processo já iniciado)",
+  "Começa pelos de menor valor para zerar rápido a lista",
+  "Aguarda o sistema de cobrança automática e só age se alguém ligar"
+ ],
+ correct:1,
+ explain:"Prevenção primeiro: os que vencem amanhã podem ser resolvidos sem encargos. Vencidos recentes sem contato têm a maior janela de resolução rápida. Os antigos já estão em processo — trabalhar de forma mais estratégica. Zerar pelo menor valor é o pior critério possível em cobrança."},
+
+{id:19,cat:"Priorização de Carteira",diff:"Avançado",skill:"AU",
+ title:"Dois sacados ligam ao mesmo tempo",
+ text:"Você está na ligação A (R$200.000 · 2 dias de atraso · histórico cooperativo) quando o ramal B começa a tocar (R$30.000 · 30 dias · histórico problemático). O que você decide?",
+ opts:[
+  "Interrompe A para atender B — está esperando há mais tempo",
+  "Finaliza A (maior valor, janela de ação aberta, histórico cooperativo — alta chance de resolução rápida) e retorna B logo em seguida",
+  "Coloca A em espera e atende B rapidamente",
+  "Ignora B e resolve A com calma"
+ ],
+ correct:1,
+ explain:"Autonomia é priorizar com critério, não por ordem de chegada. R$200k em janela de ação com histórico cooperativo tem potencial de resolução imediata — interromper essa negociação seria contraproducente. B (R$30k, 30 dias, histórico difícil) precisa de atenção, mas não supera A nesse momento."},
+
+{id:20,cat:"Priorização de Carteira",diff:"Básico",skill:"CR",
+ title:"Critério equivocado de um analista novo",
+ text:"Colega novo propõe: 'Vou cobrar primeiro os títulos menores para zerar logo a lista e mostrar resultado.' Como você avalia e o que faz?",
+ opts:[
+  "Boa ideia — volume de atendimentos é um indicador",
+  "Cada analista escolhe seu critério — não interfere",
+  "Esse critério está errado: priorizar pelo menor valor foca no que tem menor impacto e deixa os maiores riscos acumulando. Orientar o colega sobre os critérios corretos (valor + tempo + histórico) é responsabilidade de quem tem mais experiência",
+  "Deixa ele aprender com o tempo"
+ ],
+ correct:2,
+ explain:"Controle de risco inclui a qualidade do trabalho da equipe. Priorizar pelo menor valor é o critério mais ineficiente em cobrança — os maiores riscos ficam acumulando. Orientar com critério objetivo é a postura correta, não omissão."},
+
+{id:21,cat:"Priorização de Carteira",diff:"Intermediário",skill:"VA",
+ title:"Valor menor, mas reincidente — quem priorizar?",
+ text:"Dois sacados aguardam ação:\n• Sacado A: R$90.000 · 8 dias · 1ª ocorrência\n• Sacado B: R$35.000 · 5 dias · 3ª ocorrência no ano\nQual você prioriza e por quê?",
+ opts:[
+  "A — maior valor sempre vence",
+  "B — reincidente precisa de atenção imediata",
+  "A tem prioridade pelo valor (R$90k, 2,5x maior) e pela janela (1ª ocorrência, maior chance de resolução rápida). B é urgente pelo padrão de risco crescente e deve ser trabalhado logo em seguida — mas não supera A",
+  "Mesma prioridade — trabalhar em paralelo"
+ ],
+ correct:2,
+ explain:"A leitura analítica combina os dois fatores. A tem impacto financeiro maior e maior probabilidade de resolução em uma ligação. B, apesar do valor menor, tem padrão de risco crescente que não pode ser ignorado. A ordem é A → B, com B sendo trabalhado no mesmo dia."},
+
+// ─── SACADO EM DIFICULDADE ───
+{id:22,cat:"Sacado em Dificuldade",diff:"Avançado",skill:"CR",
+ title:"Sacado comunica recuperação judicial — R$180k em aberto",
+ text:"Sacado liga informando que entrou com pedido de recuperação judicial. Você tem R$180.000 em 4 títulos em aberto com ele na carteira de diferentes cedentes. Ação imediata?",
+ opts:[
+  "Acionar o jurídico e encerrar qualquer cobrança ativa imediatamente",
+  "Continuar cobrando — sem documento oficial em mãos, não altera nada",
+  "Registrar a comunicação com data/hora, solicitar número e comprovante do processo, suspender ações de cobrança ativa e acionar o jurídico com urgência — sem nenhuma movimentação financeira sem orientação jurídica",
+  "Negociar acordo direto com o sacado enquanto o processo tramita"
+ ],
+ correct:2,
+ explain:"Recuperação judicial é evento jurídico que muda completamente o fluxo de cobrança. Com R$180k em jogo, qualquer ação errada compromete a posição do FIDC no processo. Registrar, documentar, suspender e acionar o jurídico são as únicas ações corretas. Negociar diretamente durante RJ pode ser ilegal e prejudicar o FIDC."},
+
+{id:23,cat:"Sacado em Dificuldade",diff:"Básico",skill:"PR",
+ title:"Notícia de mercado sobre sacado com atraso",
+ text:"Você lê uma publicação do setor sobre dificuldades financeiras de uma empresa que é sacado na carteira do cedente AGRONORTE, com R$95.000 em títulos e 10 dias de atraso. O sacado ainda não entrou em contato. O que você faz?",
+ opts:[
+  "Aguarda o sacado se manifestar — não é seu papel pesquisar sobre clientes",
+  "Registra a notícia, contata o sacado hoje para entender a situação de primeira mão e alerta o gestor sobre o risco potencial na carteira — com a notícia como contexto",
+  "Aciona o jurídico imediatamente com base na notícia",
+  "Passa a informação para o cedente tratar diretamente com o sacado"
+ ],
+ correct:1,
+ explain:"Proatividade é usar todas as informações disponíveis para antecipar. Esperar o sacado ligar com R$95k em atraso e crise de mercado declarada é negligência. O analista atento age, documenta e alerta o gestor — isso é gestão de carteira, não apenas cobrança."},
+
+{id:24,cat:"Sacado em Dificuldade",diff:"Intermediário",skill:"CM",
+ title:"Sacado emocionado relata que empresa pode fechar",
+ text:"Sacado liga emocionado dizendo que a empresa pode fechar. Tem R$72.000 em títulos vencidos na carteira do cedente CONSTRUMAX. No meio da conversa, começa a se desculpar. Como você conduz?",
+ opts:[
+  "Mantém o foco total na cobrança — profissionalismo é não misturar emoção com negócio",
+  "Diz que entende e que pode dar um desconto para ajudar",
+  "Reconhece a situação com empatia genuína, ouve sem interromper, pergunta o que ele pode fazer concretamente e em qual prazo — e informa que vai registrar a situação e verificar as opções disponíveis para retornar com uma resposta clara",
+  "Transfere para o gestor imediatamente — situação delicada demais"
+ ],
+ correct:2,
+ explain:"Comunicação em crise exige equilíbrio entre empatia e objetividade. O sacado precisa se sentir ouvido — isso abre o caminho para negociação. Mas empatia não é concessão: você ouve, registra e verifica o que pode oferecer dentro da política. Transferir imediatamente é uma fuga, não uma solução."},
+
+// ─── POWER BI — ROTINA ───
+{id:25,cat:"Power BI — Rotina",diff:"Básico",skill:"PR",
+ title:"Quais telas do Power BI verificar primeiro ao chegar?",
+ text:"Você inicia o dia de trabalho e abre o Power BI. Considerando a rotina de cobrança BMA, qual é a sequência de verificação mais correta das telas?",
+ opts:[
+  "Verificar apenas os títulos que venceram hoje e aguardar o dia avançar",
+  "Abrir primeiro os títulos protestados, depois os vencidos concentrados",
+  "Seguir a sequência: vencidos clean (maior risco, sem coobrigação) → recompras pendentes → notas canceladas → títulos protestados → vencidos concentrados — cada tela alimenta uma ação diferente no dia",
+  "Verificar apenas a tela de recompra — é a mais crítica operacionalmente"
+ ],
+ correct:2,
+ explain:"A rotina no Power BI tem uma lógica de prioridade: vencidos clean são risco puro do FIDC (ação imediata); recompras pendentes precisam de instrução do cedente; notas canceladas impactam a carteira e precisam de tratamento; protestados exigem verificação de status; vencidos concentrados revelam risco sistêmico. Verificar em sequência garante que nada crítico fique para o fim do dia."},
+
+{id:26,cat:"Power BI — Rotina",diff:"Intermediário",skill:"VA",
+ title:"Tela de vencidos clean — o que o analista deve observar",
+ text:"Ao abrir a tela de vencidos clean no Power BI, você vê 3 títulos de um mesmo sacado vencidos há mais de 20 dias, cedente TEXTILNORTE, todos sem coobrigação, totalizando R$340.000. Esse sacado não aparece na tela de recompra. O que essa combinação de informações indica?",
+ opts:[
+  "Situação normal — esperar mais alguns dias antes de agir",
+  "O cedente provavelmente não sabe que os títulos estão vencidos",
+  "Títulos clean vencidos há 20 dias sem recompra solicitada indica que o cedente não está monitorando ou optou por não recomprar — o risco de R$340k é 100% do FIDC. Acionar o cedente imediatamente para entender a situação do sacado e avaliar se há necessidade de escalonamento",
+  "Aguardar a tela de protestados registrar os títulos antes de agir"
+ ],
+ correct:2,
+ explain:"A combinação de clean + vencido + sem recompra é sinal de alerta. O FIDC carrega o risco sozinho e o cedente não sinalizou nenhuma ação. O analista analítico não espera a tela de protestados acusar — ele age proativamente ao identificar o padrão, aciona o cedente e documenta."},
+
+{id:27,cat:"Power BI — Rotina",diff:"Avançado",skill:"VA",
+ title:"Nota cancelada identificada no Power BI — impacto na carteira",
+ text:"Na tela de notas canceladas do Power BI, você identifica uma NF-e cancelada após a cessão dos direitos ao FIDC. O título referente a essa nota ainda consta como ativo na carteira com valor de R$68.000 e vence em 3 dias. O que você faz?",
+ opts:[
+  "Aguardar o vencimento e cobrar normalmente — o título já está na carteira",
+  "Cancelar o título imediatamente no sistema sem mais verificações",
+  "Suspender qualquer ação de cobrança sobre esse título, registrar a inconsistência, acionar o cedente para esclarecimento e encaminhar ao gestor — um título lastreado em NF-e cancelada representa risco jurídico e operacional que precisa de análise antes de qualquer movimentação",
+  "Cobrar o sacado antes de qualquer cancelamento para garantir o recebimento"
+ ],
+ correct:2,
+ explain:"Nota cancelada após a cessão é uma situação de risco jurídico: o lastro do título foi invalidado. Cobrar sem verificar expõe o FIDC a contestação. A conduta correta é suspender, registrar, acionar o cedente e escalar para análise — nunca cobrar nem cancelar unilateralmente sem entender o contexto completo."},
+
+// ─── FOLLOW-UP ───
+{id:28,cat:"Follow-up e Retorno",diff:"Básico",skill:"PR",
+ title:"Sacado prometeu pagar até sexta — não pagou",
+ text:"Na segunda passada, sacado prometeu pagamento de R$38.000 'até sexta'. Hoje é segunda. Nada foi pago, nenhuma mensagem enviada. Quando e como você age?",
+ opts:[
+  "Aguarda mais alguns dias — pode ter sido atraso pontual",
+  "Age hoje, no início da manhã: contata o sacado referenciando a promessa não cumprida, pergunta o que aconteceu e obtém novo compromisso com data e forma de pagamento confirmados por escrito",
+  "Escala ao gestor — promessa não cumprida é sinal de má-fé",
+  "Envia cobrança via cartório imediatamente"
+ ],
+ correct:1,
+ explain:"Promessa não cumprida exige ação no primeiro dia útil seguinte. Referenciar o compromisso anterior (demonstra que você acompanha), entender o que aconteceu e obter novo prazo formal com confirmação escrita. Aguardar mais dias enfraquece sua posição e sinaliza que prazos não têm consequência."},
+
+{id:29,cat:"Follow-up e Retorno",diff:"Intermediário",skill:"AU",
+ title:"3 contatos sem retorno — sacado de R$28k com bom histórico",
+ text:"Sacado com bom histórico tem R$28.000 vencido há 7 dias. Você fez 3 contatos (2 e-mails + 1 ligação sem retorno). Nenhuma resposta. Próximo passo?",
+ opts:[
+  "Escala ao gestor — 3 tentativas já são suficientes",
+  "Aguarda — bom histórico indica que vai pagar",
+  "Tenta canal alternativo (WhatsApp, contato secundário cadastrado), registra todas as tentativas e, se sem retorno em mais 2 dias úteis, escala ao gestor com histórico completo de contatos — 5 tentativas sem resposta em R$28k justifica escalonamento",
+  "Abre cobrança judicial diretamente — silêncio é fuga"
+ ],
+ correct:2,
+ explain:"Autonomia é saber quando você ainda pode resolver e quando escalar. R$28k com bom histórico e 3 tentativas ainda está no seu escopo — mas merece mais um esforço antes de escalar. Canal alternativo é ação inteligente. Se não funcionar, o escalonamento com histórico documentado é bem-feito e respeita o gestor."},
+
+{id:30,cat:"Follow-up e Retorno",diff:"Intermediário",skill:"CR",
+ title:"Sacado pede baixa no sistema antes de pagar",
+ text:"Sacado diz: 'Tira meu título do sistema primeiro, que eu pago em seguida.' Valor: R$44.000. Sem nenhum comprovante ou agendamento de TED. O que você faz?",
+ opts:[
+  "Retira do sistema — demonstra boa-fé e incentiva o pagamento",
+  "Concorda verbalmente mas não retira de fato",
+  "Explica que a baixa ocorre após a confirmação do pagamento — é procedimento padrão operacional, não falta de confiança. Oferece agilidade: assim que o comprovante chegar ou o crédito for confirmado, a baixa é feita imediatamente",
+  "Escala ao gestor — pedido incomum demais"
+ ],
+ correct:2,
+ explain:"Dar baixa antes do pagamento elimina o incentivo e expõe o FIDC ao risco de não receber. Esse limite precisa ser mantido com firmeza e clareza — explicando que é processo padrão (não desconfiança) e oferecendo agilidade na baixa após confirmação. Essa postura fecha o ciclo com profissionalismo."}
+];
+
+// ══════════════════════════════════════════════════════════════
+// ESTADO
+// ══════════════════════════════════════════════════════════════
+let G = {
+  player:"", sid:"",
+  qs:[],          // questões embaralhadas
+  cur:0,
+  score:0,
+  answers:[],     // {qId,cat,skill,diff,chosen,correct,timeMs,pts}
+  streak:0, maxStreak:0,
+  timerInt:null, timerLeft:60, timerMax:60,
+  answered:false,
+};
+
+// ══════════════════════════════════════════════════════════════
+// STORAGE LOCAL — persiste dados no navegador de cada usuário
+// Para ranking compartilhado, o analista exporta e a liderança importa
+// ══════════════════════════════════════════════════════════════
+const LS_KEY = "bma_lb_v1";
+
+function lsLoad(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY)||"{}"); }catch(e){ return {}; }
+}
+function lsSave(data){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(data)); }catch(e){}
+}
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+function init(){
+  goLogin();
+}
+
+// ══════════════════════════════════════════════════════════════
+// SCREENS
+// ══════════════════════════════════════════════════════════════
+const SCREENS=["sLogin","sGame","sResult","sLeadership"];
+function show(id){ SCREENS.forEach(s=>document.getElementById(s).classList.toggle("hidden",s!==id)); }
+function goLogin(){ show("sLogin"); document.getElementById("hPlayer").classList.add("hidden"); setTimeout(()=>document.getElementById("iName").focus(),80); }
+function goLeadership(){ show("sLeadership"); loadLeadership(); }
+
+// ══════════════════════════════════════════════════════════════
+// START
+// ══════════════════════════════════════════════════════════════
+function doStart(){
+  const n=document.getElementById("iName").value.trim();
+  if(!n||n.length<2){ toast("Digite seu nome para começar.","err"); return; }
+  G.player=n; G.sid=Date.now()+"_"+Math.random().toString(36).substr(2,5);
+  G.qs=[...Q].sort(()=>Math.random()-.5);
+  G.cur=0; G.score=0; G.answers=[]; G.streak=0; G.maxStreak=0;
+  document.getElementById("hPlayer").textContent=n;
+  document.getElementById("hPlayer").classList.remove("hidden");
+  show("sGame"); renderQ();
+}
+function doRestart(){ goLogin(); }
+
+// ══════════════════════════════════════════════════════════════
+// QUESTÃO
+// ══════════════════════════════════════════════════════════════
+function renderQ(){
+  const q=G.qs[G.cur], total=G.qs.length;
+  document.getElementById("gQn").textContent=G.cur+1;
+  document.getElementById("gProg").style.width=`${(G.cur/total)*100}%`;
+  document.getElementById("gScore").textContent=G.score;
+
+  // Meta
+  const dmap={Básico:"basic",Intermediário:"inter",Avançado:"adv"};
+  const catmap={"Prorrogação de Títulos":"#1b6fd4","Títulos Escrow":"#7c3aed","Pagamento Incorreto":"#e53e3e","Contestação de Mora":"#f0a52a","Priorização de Carteira":"#0891b2","Sacado em Dificuldade":"#0fb981","Power BI — Rotina":"#06b6d4","Follow-up e Retorno":"#8b5cf6"};
+  const catEl=document.getElementById("mCat");
+  catEl.textContent=q.cat;
+  catEl.style.background=(catmap[q.cat]||"#1b6fd4")+"22";
+  catEl.style.color=catmap[q.cat]||"#5ba3f5";
+  catEl.style.borderColor=(catmap[q.cat]||"#1b6fd4")+"44";
+  const td=document.getElementById("mDiff");
+  td.className=`tag tag-${dmap[q.diff]||"basic"}`;
+  td.textContent=q.diff;
+  const ts=document.getElementById("mSkill");
+  ts.className=`tag-skill skill-${q.skill}`;
+  ts.textContent=SKILLS[q.skill].name;
+  document.getElementById("mNum").textContent=`#${q.id}`;
+  document.getElementById("mTitle").textContent=q.title;
+  document.getElementById("mText").textContent=q.text;
+
+  // Opções
+  const grid=document.getElementById("optsGrid");
+  grid.innerHTML="";
+  ["A","B","C","D"].forEach((l,i)=>{
+    const b=document.createElement("button");
+    b.className="opt"; b.dataset.i=i;
+    b.innerHTML=`<span class="oletter">${l}</span><span class="otext">${q.opts[i]}</span>`;
+    b.onclick=()=>pick(i);
+    grid.appendChild(b);
+  });
+
+  document.getElementById("fbBox").className="hidden";
+  document.getElementById("fbBox").innerHTML="";
+  document.getElementById("btnNext").classList.add("hidden");
+  G.answered=false;
+
+  const tmax={Básico:60,Intermediário:45,Avançado:30}[q.diff]||60;
+  startTimer(tmax);
+}
+
+// Timer
+function startTimer(sec){
+  clearInterval(G.timerInt);
+  G.timerLeft=sec; G.timerMax=sec;
+  updateTimer(sec,sec);
+  G.timerInt=setInterval(()=>{
+    G.timerLeft--;
+    updateTimer(G.timerLeft,G.timerMax);
+    if(G.timerLeft<=0){ clearInterval(G.timerInt); if(!G.answered) timeOut(); }
+  },1000);
+}
+function updateTimer(left,max){
+  const c=2*Math.PI*19; // r=19
+  const off=c*(1-left/max);
+  const arc=document.getElementById("tArc");
+  arc.style.strokeDashoffset=off;
+  const p=left/max;
+  arc.style.stroke=p>.5?"var(--blue)":p>.25?"var(--orange2)":"var(--red)";
+  document.getElementById("tNum").textContent=left;
+}
+function timeOut(){
+  if(G.answered)return;
+  G.answered=true;
+  disableOpts();
+  const q=G.qs[G.cur];
+  document.querySelectorAll(".opt")[q.correct].classList.add("reveal");
+  G.answers.push({qId:q.id,cat:q.cat,skill:q.skill,diff:q.diff,chosen:-1,correct:false,timeMs:G.timerMax*1000,pts:0});
+  G.streak=0;
+  showFbStatic("⏱️","Tempo esgotado",q.explain,"timeout");
+  document.getElementById("btnNext").classList.remove("hidden");
+}
+
+// Selecionar
+function pick(idx){
+  if(G.answered)return;
+  G.answered=true;
+  clearInterval(G.timerInt);
+  const q=G.qs[G.cur];
+  const ok=idx===q.correct;
+  const elapsed=(G.timerMax-G.timerLeft)*1000;
+  let pts=0;
+  if(ok){
+    const base={Básico:100,Intermediário:200,Avançado:350}[q.diff]||100;
+    const bonus=Math.round((G.timerLeft/G.timerMax)*60);
+    pts=base+bonus;
+    G.score+=pts; G.streak++; if(G.streak>G.maxStreak)G.maxStreak=G.streak;
+  } else { G.streak=0; }
+  G.answers.push({qId:q.id,cat:q.cat,skill:q.skill,diff:q.diff,chosen:idx,correct:ok,timeMs:elapsed,pts});
+  document.getElementById("gScore").textContent=G.score;
+  disableOpts();
+  const btns=document.querySelectorAll(".opt");
+  btns[idx].classList.add(ok?"correct":"wrong");
+  if(!ok) btns[q.correct].classList.add("reveal");
+  showFbAI(q,idx,ok,pts);
+  document.getElementById("btnNext").classList.remove("hidden");
+}
+function disableOpts(){ document.querySelectorAll(".opt").forEach(b=>b.disabled=true); }
+
+// Feedback estático
+function showFbAI(q,chosen,ok,pts){
+  const box=document.getElementById("fbBox");
+  const icon=ok?"✅":"❌";
+  const cls=ok?"fb-ok":"fb-fail";
+  const lbl=ok?`+${pts} pts`:"Incorreto";
+  box.className=`fb-box ${cls}`;
+  box.innerHTML=`
+    <div class="fb-header">
+      <span class="fb-icon">${icon}</span>
+      <span class="fb-label">${ok?"Decisão correta":"Decisão incorreta"}</span>
+      <span class="fb-pts">${lbl}</span>
+    </div>
+    <div class="fb-text">${q.explain}</div>
+    <div class="fb-skill">Competência avaliada: ${SKILLS[q.skill].name}</div>`;
+}
+
+function showFbStatic(icon,lbl,txt,type){
+  const box=document.getElementById("fbBox");
+  box.className=`fb-box fb-${type}`;
+  box.innerHTML=`
+    <div class="fb-header"><span class="fb-icon">${icon}</span><span class="fb-label">${lbl}</span></div>
+    <div class="fb-text">${txt}</div>`;
+}
+
+function goNext(){
+  G.cur++;
+  if(G.cur>=G.qs.length) finishGame();
+  else renderQ();
+}
+
+// ══════════════════════════════════════════════════════════════
+// FIM DE JOGO
+// ══════════════════════════════════════════════════════════════
+function finishGame(){
+  const total=G.qs.length;
+  const correct=G.answers.filter(a=>a.correct).length;
+  const acc=Math.round((correct/total)*100);
+  const avgT=Math.round(G.answers.reduce((s,a)=>s+a.timeMs,0)/total/1000);
+
+  // Por competência
+  const skillData={};
+  Object.keys(SKILLS).forEach(k=>skillData[k]={total:0,correct:0,pts:0,maxPts:0});
+  G.answers.forEach(a=>{
+    if(!skillData[a.skill])return;
+    skillData[a.skill].total++;
+    if(a.correct)skillData[a.skill].correct++;
+    skillData[a.skill].pts+=a.pts;
+    const base={Básico:100,Intermediário:200,Avançado:350}[a.diff]||100;
+    skillData[a.skill].maxPts+=base+60;
+  });
+
+  // Pontuação ponderada por competência (0-10)
+  const skillScore={};
+  Object.entries(skillData).forEach(([k,v])=>{
+    skillScore[k]=v.total?Math.round((v.correct/v.total)*10*10)/10:0;
+  });
+
+  // Nível geral
+  let level,medal;
+  if(acc>=90){level="Expert";medal="🥇";}
+  else if(acc>=75){level="Sênior";medal="🥈";}
+  else if(acc>=60){level="Pleno";medal="🏅";}
+  else{level="Júnior";medal="📚";}
+
+  // Pontos fracos
+  const weaks=Object.entries(skillScore).filter(([,v])=>v<6).sort((a,b)=>a[1]-b[1]);
+
+  // Salvar no localStorage
+  try{
+    const store = lsLoad();
+    const safe = G.player.toLowerCase().replace(/[^a-z0-9]/g,'_').substring(0,28);
+    const old = store[safe]||null;
+    if(old){
+      const sessions=(old.sessions||0)+1;
+      const bestScore=Math.max(old.bestScore||0,G.score);
+      const tCorrect=(old.totalCorrect||0)+correct;
+      const tQ=(old.totalQ||0)+total;
+      const tTime=(old.totalTime||0)+(avgT*total);
+      const sd={...(old.skillData||{})};
+      Object.entries(skillData).forEach(([k,v])=>{
+        if(!sd[k])sd[k]={total:0,correct:0};
+        sd[k].total+=v.total; sd[k].correct+=v.correct;
+      });
+      const ss={};
+      Object.entries(sd).forEach(([k,v])=>{ss[k]=v.total?Math.round((v.correct/v.total)*10*10)/10:0;});
+      store[safe]={player:G.player,sessions,bestScore,totalCorrect:tCorrect,totalQ:tQ,totalTime:tTime,skillData:sd,skillScore:ss,level,lastTs:Date.now()};
+    } else {
+      store[safe]={player:G.player,sessions:1,bestScore:G.score,totalCorrect:correct,totalQ:total,totalTime:avgT*total,skillData,skillScore,level,lastTs:Date.now()};
+    }
+    lsSave(store);
+  }catch(e){ console.warn("ls err",e); }
+
+  // UI resultado
+  document.getElementById("rMedal").textContent=medal;
+  document.getElementById("rName").textContent=G.player;
+  document.getElementById("rScore").textContent=G.score.toLocaleString("pt-BR");
+  document.getElementById("rLevel").textContent=`Nível ${level}`;
+  document.getElementById("rAcc").textContent=`${acc}%`;
+  document.getElementById("rTime").textContent=`${avgT}s`;
+  document.getElementById("rStreak").textContent=`${G.maxStreak}✓`;
+
+  // Barras por competência
+  const SKILL_COLORS={AU:"#7c3aed",VA:"#0891b2",PR:"#0fb981",CM:"#f0a52a",CR:"#e53e3e"};
+  const bars=document.getElementById("rCompBars");
+  bars.innerHTML=Object.entries(SKILLS).map(([k,s])=>{
+    const sc=skillScore[k]||0;
+    const pct=sc*10;
+    const col=SKILL_COLORS[k];
+    const v=skillData[k];
+    const label=v&&v.total?`${v.correct}/${v.total} acertos`:"—";
+    return `
+      <div class="cbar-row">
+        <span class="cbar-name">${s.name}</span>
+        <div class="cbar-wrap"><div class="cbar-fill" style="width:${pct}%;background:${col}"></div></div>
+        <span class="cbar-pct">${sc.toFixed(1)}</span>
+        <span class="cbar-pts">${label}</span>
+      </div>`;
+  }).join("");
+
+  // Pontos fracos
+  const weakDiv=document.getElementById("rWeak");
+  if(weaks.length===0){
+    weakDiv.innerHTML='<div style="font-size:13px;color:var(--green2)">✅ Excelente! Nenhuma competência abaixo do esperado.</div>';
+  } else {
+    weakDiv.innerHTML=weaks.map(([k,v])=>{
+      const s=SKILLS[k];
+      const tips={
+        AU:"Pratique identificar o que está dentro do seu escopo de decisão — nem tudo precisa ser escalado.",
+        VA:"Antes de agir, leia o contexto completo: histórico, concentração, valor e padrão do cedente.",
+        PR:"Antecipe: revise sua carteira diariamente e aja antes do problema chegar até você.",
+        CM:"Adapte o tom ao contexto — 1º contato, reincidente e crise exigem abordagens diferentes.",
+        CR:"Quando em dúvida, não aprove nem rejeite sem embasamento. Registre e escale com análise."
+      };
+      return `<div class="weak-item"><span class="weak-icon">⚠️</span><div class="weak-text"><strong>${s.name} (${v.toFixed(1)}/10)</strong><br>${tips[k]}</div></div>`;
+    }).join("");
+  }
+
+  show("sResult");
+}
+
+// ══════════════════════════════════════════════════════════════
+// LIDERANÇA
+// ══════════════════════════════════════════════════════════════
+let leaders=[];
+
+function loadLeadership(){
+  leaders=[];
+  try{
+    const store=lsLoad();
+    leaders=Object.values(store).sort((a,b)=>(b.bestScore||0)-(a.bestScore||0));
+    // adicionar id se não tiver
+    leaders.forEach(l=>{ if(!l.id) l.id=l.player.toLowerCase().replace(/[^a-z0-9]/g,'_').substring(0,28); });
+  }catch(e){}
+  renderRanking(); buildCompGrid(); buildSelect(); updKPIs();
+}
+
+function lvInfo(acc){
+  if(acc>=90)return{label:"Expert",cls:"lv-E"};
+  if(acc>=75)return{label:"Sênior",cls:"lv-S"};
+  if(acc>=60)return{label:"Pleno",cls:"lv-P"};
+  return{label:"Júnior",cls:"lv-J"};
+}
+
+function updKPIs(){
+  const n=leaders.length;
+  const ts=leaders.reduce((s,l)=>s+(l.sessions||0),0);
+  const avgSc=n?Math.round(leaders.reduce((s,l)=>s+(l.bestScore||0),0)/n):0;
+  const avgAcc=n?Math.round(leaders.reduce((s,l)=>{const a=l.totalQ?(l.totalCorrect/l.totalQ)*100:0;return s+a;},0)/n):0;
+
+  // Melhor e pior competência (média geral)
+  const SKILL_COLORS={AU:"#7c3aed",VA:"#0891b2",PR:"#0fb981",CM:"#f0a52a",CR:"#e53e3e"};
+  if(n){
+    const agg={};
+    Object.keys(SKILLS).forEach(k=>agg[k]={total:0,correct:0});
+    leaders.forEach(l=>{
+      if(l.skillData)Object.entries(l.skillData).forEach(([k,v])=>{
+        if(agg[k]){agg[k].total+=v.total||0;agg[k].correct+=v.correct||0;}
+      });
+    });
+    const accs=Object.entries(agg).map(([k,v])=>({k,pct:v.total?(v.correct/v.total)*100:0})).sort((a,b)=>b.pct-a.pct);
+    const best=accs[0],worst=accs[accs.length-1];
+    document.getElementById("kTopComp").textContent=best?SKILLS[best.k].name:"—";
+    document.getElementById("kWeakComp").textContent=worst?SKILLS[worst.k].name:"—";
+  } else {
+    document.getElementById("kTopComp").textContent="—";
+    document.getElementById("kWeakComp").textContent="—";
+  }
+
+  document.getElementById("kAnalysts").textContent=n||"0";
+  document.getElementById("kSessions").textContent=ts||"0";
+  document.getElementById("kAvgScore").textContent=n?avgSc.toLocaleString("pt-BR"):"—";
+  document.getElementById("kAvgAcc").textContent=n?`${avgAcc}%`:"—";
+}
+
+function renderRanking(){
+  const body=document.getElementById("lbBody");
+  if(!leaders.length){ body.innerHTML='<div style="padding:32px;text-align:center;color:var(--tx3)">Sem dados ainda.</div>'; return; }
+  const RNKCLS=["r1","r2","r3"];
+  const MEDALS=["🥇","🥈","🥉"];
+  body.innerHTML=leaders.map((l,i)=>{
+    const acc=l.totalQ?Math.round((l.totalCorrect/l.totalQ)*100):0;
+    const avgT=l.totalQ?Math.round(l.totalTime/l.totalQ):0;
+    const lv=lvInfo(acc);
+    const accColor=acc>=75?"var(--green2)":acc>=60?"var(--orange2)":"var(--red2)";
+    return `
+      <div class="lb-row">
+        <div class="lb-rank ${RNKCLS[i]||''}">${MEDALS[i]||(i+1)}</div>
+        <div>
+          <div class="lb-name">${esc(l.player)}</div>
+          <div class="lb-sub">${l.sessions||0} rodada${(l.sessions||0)!==1?'s':''}</div>
+        </div>
+        <div class="lb-score">${(l.bestScore||0).toLocaleString("pt-BR")}</div>
+        <div class="lb-acc" style="color:${accColor}">${acc}%</div>
+        <div class="lb-time">${avgT}s</div>
+        <div><span class="lb-badge ${lv.cls}">${lv.label}</span></div>
+      </div>`;
+  }).join("");
+}
+
+function buildCompGrid(){
+  const grid=document.getElementById("compGrid");
+  const SKILL_COLORS={AU:"#7c3aed",VA:"#0891b2",PR:"#0fb981",CM:"#f0a52a",CR:"#e53e3e"};
+  if(!leaders.length){ grid.innerHTML='<div style="color:var(--tx3);font-size:13px">Sem dados ainda.</div>'; return; }
+
+  // Agregar por skill
+  const agg={};
+  Object.keys(SKILLS).forEach(k=>agg[k]={total:0,correct:0,byPlayer:[]});
+  leaders.forEach(l=>{
+    if(l.skillData)Object.entries(l.skillData).forEach(([k,v])=>{
+      if(agg[k]){agg[k].total+=v.total||0;agg[k].correct+=v.correct||0;}
+    });
+    if(l.skillScore){
+      Object.entries(l.skillScore).forEach(([k,v])=>{
+        if(agg[k])agg[k].byPlayer.push({name:l.player,sc:v});
+      });
+    }
+  });
+
+  grid.innerHTML=Object.entries(SKILLS).map(([k,s])=>{
+    const v=agg[k];
+    const avgPct=v.total?Math.round((v.correct/v.total)*100):0;
+    const col=SKILL_COLORS[k];
+    const scoreColor=avgPct>=75?"var(--green2)":avgPct>=60?"var(--orange2)":"var(--red2)";
+    // Top 3 analistas nessa skill
+    const top=(v.byPlayer||[]).sort((a,b)=>b.sc-a.sc).slice(0,4);
+    const topHTML=top.map(p=>`
+      <div class="cmb-row">
+        <span class="cmb-name">${esc(p.name)}</span>
+        <div class="cmb-bar"><div class="cmb-fill" style="width:${p.sc*10}%;background:${col}"></div></div>
+        <span class="cmb-pct">${p.sc.toFixed(1)}</span>
+      </div>`).join("");
+    return `
+      <div class="comp-card">
+        <div class="comp-card-top">
+          <span class="comp-card-name">${s.name}</span>
+          <span class="comp-card-avg" style="color:${scoreColor}">${avgPct}%</span>
+        </div>
+        <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">${v.total} respostas · ${v.correct} acertos</div>
+        <div class="comp-mini-bars">${topHTML||'<div style="font-size:11px;color:var(--tx3)">Sem dados</div>'}</div>
+      </div>`;
+  }).join("");
+}
+
+function buildSelect(){
+  const sel=document.getElementById("dSel");
+  sel.innerHTML='<option value="">— selecione —</option>';
+  leaders.forEach(l=>{
+    const o=document.createElement("option");
+    o.value=l.id; o.textContent=l.player;
+    sel.appendChild(o);
+  });
+}
+
+function loadDetail(){
+  const id=document.getElementById("dSel").value;
+  const panel=document.getElementById("dPanel");
+  if(!id){panel.innerHTML="";return;}
+  const l=leaders.find(x=>x.id===id);
+  if(!l){panel.innerHTML="";return;}
+
+  const acc=l.totalQ?Math.round((l.totalCorrect/l.totalQ)*100):0;
+  const avgT=l.totalQ?Math.round(l.totalTime/l.totalQ):0;
+  const lv=lvInfo(acc);
+  const accColor=acc>=75?"var(--green2)":acc>=60?"var(--orange2)":"var(--red2)";
+  const SKILL_COLORS={AU:"#7c3aed",VA:"#0891b2",PR:"#0fb981",CM:"#f0a52a",CR:"#e53e3e"};
+
+  // Skills breakdown
+  const skillRows=Object.entries(SKILLS).map(([k,s])=>{
+    const v=l.skillData&&l.skillData[k]?l.skillData[k]:{total:0,correct:0};
+    const sc=l.skillScore&&l.skillScore[k]!=null?l.skillScore[k]:0;
+    const pct=v.total?Math.round((v.correct/v.total)*100):0;
+    const col=SKILL_COLORS[k];
+    const scColor=sc>=7?"var(--green2)":sc>=5?"var(--orange2)":"var(--red2)";
+    const flag=sc<5?"⚠️":sc<7?"":"✅";
+    return `
+      <div class="cbar-row">
+        <span class="cbar-name">${s.name}</span>
+        <div class="cbar-wrap"><div class="cbar-fill" style="width:${pct}%;background:${col}"></div></div>
+        <span class="cbar-pct" style="color:${scColor}">${sc.toFixed(1)}</span>
+        <span class="cbar-pts">${flag} ${v.correct||0}/${v.total||0}</span>
+      </div>`;
+  }).join("");
+
+  // Fraquezas
+  const weaks=Object.entries(l.skillScore||{}).filter(([,v])=>v<6).sort((a,b)=>a[1]-b[1]);
+  const weakHTML=weaks.length===0
+    ?'<div style="font-size:13px;color:var(--green2);padding:8px 0">✅ Sem pontos críticos identificados.</div>'
+    :weaks.map(([k,v])=>`<div class="weak-item"><span class="weak-icon">⚠️</span><div class="weak-text"><strong>${SKILLS[k].name} — ${v.toFixed(1)}/10</strong></div></div>`).join("");
+
+  panel.innerHTML=`
+    <div class="dcard">
+      <div class="dcard-hero">
+        <div>
+          <div class="dcard-name">${esc(l.player)}</div>
+          <div class="dcard-sub">${l.sessions||0} rodada${(l.sessions||0)!==1?'s':''} · Último acesso: ${l.lastTs?new Date(l.lastTs).toLocaleDateString('pt-BR'):'—'}</div>
+        </div>
+        <span class="lb-badge ${lv.cls}" style="font-size:11px;padding:5px 12px">${lv.label}</span>
+      </div>
+      <div class="dstats">
+        <div class="dstat"><div class="dstat-v" style="color:var(--gold)">${(l.bestScore||0).toLocaleString("pt-BR")}</div><div class="dstat-l">Melhor score</div></div>
+        <div class="dstat"><div class="dstat-v" style="color:${accColor}">${acc}%</div><div class="dstat-l">Acurácia</div></div>
+        <div class="dstat"><div class="dstat-v">${avgT}s</div><div class="dstat-l">Tempo médio</div></div>
+      </div>
+      <div class="sec-title" style="margin-top:4px">Nota por competência</div>
+      <div class="comp-bars" style="margin-top:10px">${skillRows}</div>
+      <div class="sec-title" style="margin-top:16px">Pontos de atenção</div>
+      <div class="weak-list" style="margin-top:8px">${weakHTML}</div>
+    </div>`;
+}
+
+// Tabs
+function swTab(t,el){
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
+  el.classList.add("on");
+  ["tRanking","tComp","tDetail"].forEach(id=>document.getElementById(id).classList.add("hidden"));
+  const map={ranking:"tRanking",comp:"tComp",detail:"tDetail"};
+  document.getElementById(map[t]).classList.remove("hidden");
+}
+
+// Utils
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+let _toastT=null;
+function toast(msg,type=""){
+  const e=document.querySelector(".toast");if(e)e.remove();
+  if(_toastT)clearTimeout(_toastT);
+  const d=document.createElement("div");
+  d.className=`toast ${type}`;d.textContent=msg;
+  document.body.appendChild(d);
+  _toastT=setTimeout(()=>d.remove(),3000);
+}
+
+window.addEventListener("DOMContentLoaded",()=>init());
+</script>
+</body>
+</html>
